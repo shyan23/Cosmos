@@ -10,6 +10,7 @@ from Backend.DB.Config import get_db_connection
 from fastapi.middleware.cors import CORSMiddleware
 from Tels_disc_no_vs_year import Telescope_image
 from Coordinate_plot import Coordinateshow
+from Map import Create3DMap
 
 
 app = FastAPI()
@@ -105,6 +106,23 @@ async def get_star_systems():
         return {"star_systems": star_systems}
     except Exception as e:
         return {"error": f"Failed to fetch star systems: {e}"}
+
+
+
+@app.post("/MAP/")
+async def postmap(ss: str):
+    return await Create3DMap(ss)
+
+
+@app.get("/viewmap")
+async def getmap():
+    file_path = IMAGE_DIR / "Mapping.png"
+    if file_path.exists():
+        return FileResponse(file_path)
+    return JSONResponse(status_code=404, content={"error": "Image not found"})
+
+
+    
 
 
 
