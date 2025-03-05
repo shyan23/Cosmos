@@ -8,8 +8,8 @@ const poppins = Poppins({
 })
 
 export const metadata = {
-  title: 'Exoplanet Data Viewer',
-  description: 'View exoplanet data visualizations in a soothing interface',
+  title: 'Astronomical Data Viewer',
+  description: 'View Astronomical data visualizations in a soothing interface',
 }
 
 export default function RootLayout({

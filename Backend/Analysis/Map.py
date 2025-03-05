@@ -131,7 +131,7 @@ async def Create3DMap(star_system: str):
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    ax.set_title(f"3D Map of {star_system} Star System")
+    ax.set_title(f"3D Map of {star_system} ")
     
     ax.legend()
     

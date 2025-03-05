@@ -12,6 +12,7 @@ export default function ExoplanetViewer() {
   const [starSystems, setStarSystems] = useState<string[]>([])
   const [selectedSystem, setSelectedSystem] = useState<string>('')
   const [showDropdown, setShowDropdown] = useState<boolean>(false)
+  const [dropdownType, setDropdownType] = useState<string>('')
 
   useEffect(() => {
     async function fetchStarSystems() {
@@ -35,8 +36,9 @@ export default function ExoplanetViewer() {
   }, [showDropdown, starSystems.length])
 
   async function fetchImage(type: string) {
-    if (type === 'coordinate' && !showDropdown) {
+    if ((type === 'coordinate' || type === '3dmap') && !showDropdown) {
       setShowDropdown(true)
+      setDropdownType(type)
       return
     }
 
@@ -60,6 +62,10 @@ export default function ExoplanetViewer() {
         uploadEndpoint = '/upload-image-stellerDist'
         viewEndpoint = '/show-image-stellerDist'
         break
+      case '3dmap':
+        uploadEndpoint = '/MAP/'
+        viewEndpoint = '/viewmap'
+        break
       default:
         console.error('Invalid image type')
         setIsLoading(false)
@@ -67,30 +73,62 @@ export default function ExoplanetViewer() {
     }
 
     try {
-      if (type === 'coordinate' && selectedSystem) {
-        const response = await fetch(`${API_BASE_URL}${uploadEndpoint}?star_system=${selectedSystem}`, {
+      // Handle 3D map case separately
+      if (type === '3dmap' && selectedSystem) {
+        console.log(`Fetching 3D map for system: ${selectedSystem}`)
+        const response = await fetch(`${API_BASE_URL}${uploadEndpoint}?ss=${selectedSystem}`, {
           method: 'POST',
         })
+        
         if (!response.ok) {
-          console.error('Failed to generate coordinate plot')
+          console.error(`Failed to generate 3D map. Status: ${response.status}`)
+          const errorText = await response.text()
+          console.error(`Error details: ${errorText}`)
           setIsLoading(false)
           return
         }
-      } else {
-        await fetch(`${API_BASE_URL}${uploadEndpoint}`, { method: 'POST' })
+      } 
+      // Handle coordinate case
+      else if (type === 'coordinate' && selectedSystem) {
+        console.log(`Fetching coordinate plot for system: ${selectedSystem}`)
+        const response = await fetch(`${API_BASE_URL}${uploadEndpoint}?star_system=${selectedSystem}`, {
+          method: 'POST',
+        })
+        
+        if (!response.ok) {
+          console.error(`Failed to generate coordinate plot. Status: ${response.status}`)
+          const errorText = await response.text()
+          console.error(`Error details: ${errorText}`)
+          setIsLoading(false)
+          return
+        }
+      } 
+      // Handle other cases
+      else if (type !== 'coordinate' && type !== '3dmap') {
+        const response = await fetch(`${API_BASE_URL}${uploadEndpoint}`, { method: 'POST' })
+        if (!response.ok) {
+          console.error(`Failed to generate ${type} plot. Status: ${response.status}`)
+          setIsLoading(false)
+          return
+        }
       }
 
-      const response = await fetch(`${API_BASE_URL}${viewEndpoint}`)
-      if (response.ok) {
-        const blob = await response.blob()
+      // Now fetch the image
+      console.log(`Fetching image from: ${API_BASE_URL}${viewEndpoint}`)
+      const imageResponse = await fetch(`${API_BASE_URL}${viewEndpoint}`)
+      
+      if (imageResponse.ok) {
+        const blob = await imageResponse.blob()
         const imageUrl = URL.createObjectURL(blob)
         setImageUrl(imageUrl)
         setImageType(type)
-        if (type === 'coordinate') {
+        if (type === 'coordinate' || type === '3dmap') {
           setShowDropdown(false)
         }
       } else {
-        console.error('Failed to fetch image')
+        console.error(`Failed to fetch image. Status: ${imageResponse.status}`)
+        const errorText = await imageResponse.text()
+        console.error(`Error details: ${errorText}`)
       }
     } catch (error) {
       console.error('Error:', error)
@@ -108,6 +146,7 @@ export default function ExoplanetViewer() {
         <button onClick={() => fetchImage('coordinate')} className="btn-soothing">Coordinate Plot</button>
         <button onClick={() => fetchImage('planetsys')} className="btn-soothing">Planetary Systems</button>
         <button onClick={() => fetchImage('stellardist')} className="btn-soothing">Stellar Distribution</button>
+        <button onClick={() => fetchImage('3dmap')} className="btn-soothing">3D Visualization</button>
       </div>
 
       {showDropdown && starSystems.length > 0 && (
@@ -128,7 +167,7 @@ export default function ExoplanetViewer() {
             ))}
           </select>
           <button
-            onClick={() => fetchImage('coordinate')}
+            onClick={() => fetchImage(dropdownType)}
             className="mt-4 btn-soothing"
           >
             Generate Plot
@@ -143,7 +182,9 @@ export default function ExoplanetViewer() {
       )}
       {imageUrl && !isLoading && (
         <div className="mt-8 bg-white rounded-lg shadow-lg p-6 transition-all duration-300 ease-in-out">
-          <h2 className="text-2xl font-light mb-4 text-teal-700">{imageType.charAt(0).toUpperCase() + imageType.slice(1)} Image</h2>
+          <h2 className="text-2xl font-light mb-4 text-teal-700">
+            {imageType === '3dmap' ? '3D Visualization' : imageType.charAt(0).toUpperCase() + imageType.slice(1)} Image
+          </h2>
           <div className="relative w-full h-[600px]">
             <Image 
               src={imageUrl} 
@@ -158,4 +199,3 @@ export default function ExoplanetViewer() {
     </div>
   )
 }
-

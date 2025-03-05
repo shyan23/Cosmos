@@ -48,4 +48,6 @@ next-env.d.ts
 /Frontend/*.tsbuildinfo
 /Frontend/next-env.d.ts
 
-/myenv
+Backend/Analysis/myenv
+
+__pycache__
