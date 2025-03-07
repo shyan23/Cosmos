@@ -51,3 +51,5 @@ next-env.d.ts
 Backend/Analysis/myenv
 
 __pycache__
+
+Frontend/v0-user-next.config.js
