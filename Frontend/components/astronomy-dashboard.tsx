@@ -5,9 +5,10 @@ import ExoplanetViewer from "./exoplanet-viewer"
 import StarManager from "./star-manager"
 import PlanetManager from "./planet-manager"
 import SatelliteManager from "./satellite-manager"
+import AstronomyDBViewer from "./search-dashboard"
 
 export default function AstronomyDashboard() {
-  const [activeTab, setActiveTab] = useState("viewer")
+  const [activeTab, setActiveTab] = useState("search")
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -23,7 +24,7 @@ export default function AstronomyDashboard() {
       {/* Custom Tabs */}
       <div className="w-full mb-8">
         <div className="grid grid-cols-4 gap-2 bg-gray-100 p-1 rounded-lg">
-          {["viewer", "stars", "planets", "satellites"].map((tab) => (
+          {["search", "viewer", "stars", "planets", "satellites"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -37,6 +38,7 @@ export default function AstronomyDashboard() {
         </div>
       </div>
 
+      {activeTab === "search" && <AstronomyDBViewer />}
       {activeTab === "viewer" && <ExoplanetViewer />}
       {activeTab === "stars" && <StarManager />}
       {activeTab === "planets" && <PlanetManager />}
@@ -44,4 +46,3 @@ export default function AstronomyDashboard() {
     </div>
   )
 }
-

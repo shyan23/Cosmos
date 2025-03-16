@@ -1,5 +1,6 @@
 from http.client import HTTPException
 from typing import Optional
+from urllib.request import Request
 from fastapi import HTTPException
 from models.starmodel import StarCreate, StarUpdate
 from fastapi import FastAPI, Query
@@ -15,13 +16,14 @@ from Backend.DB.Config import get_db_connection
 from fastapi.middleware.cors import CORSMiddleware
 from Tels_disc_no_vs_year import Telescope_image
 from Coordinate_plot import Coordinateshow
+from search_system import general_search, specified_search
 from Map import Create3DMap
 from CRUD.CRUD_star import create_star, update_star, delete_star,get_star
 from pydantic import BaseModel
 from models.planetmodel import PlanetCreate,PlanetUpdate
 from CRUD.CRUD_Planet import create_planet_function,update_planet,delete_planet_function
 from CRUD.CRUD_satellite import create_satellite_function,update_satellite_function,delete_satellite_function
-
+from fastapi import Request
 app = FastAPI()
 
 origins = [
@@ -41,6 +43,15 @@ app.add_middleware(
 
 IMAGE_DIR = Path("/home/shyan/Desktop/DbPostgresql/Backend/image/")
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+@app.post("/api/generalSearch")
+async def api_general_search(request: Request):
+    return await general_search(request)
+
+@app.post("/api/specifiedSearch")
+async def api_specified_search(request: Request):
+    return await specified_search(request)
+
 
 @app.post("/upload-image/")
 async def upload_image():
